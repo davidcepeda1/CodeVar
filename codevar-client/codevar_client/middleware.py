@@ -4,6 +4,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 
 from .config import CodevarConfig
+from .reporter import EventReporter
 from .traceback_utils import extract_exception_info
 
 logger = logging.getLogger("codevar_client")
@@ -13,6 +14,7 @@ class CodevarMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, config: CodevarConfig):
         super().__init__(app)
         self.config = config
+        self.reporter = EventReporter(config)
 
     async def dispatch(self, request: Request, call_next):
         try:
@@ -28,4 +30,9 @@ class CodevarMiddleware(BaseHTTPMiddleware):
             info.exception_type,
             info.file_path,
             info.line_number,
+        )
+        self.reporter.send(
+            info,
+            request_path=request.url.path,
+            request_method=request.method,
         )
