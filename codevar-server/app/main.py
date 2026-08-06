@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -6,9 +8,16 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.fingerprint import compute_fingerprint
 from app.models import ErrorEvent, ErrorGroup, Project
-from app.schemas import EventIn
+from app.schemas import ErrorGroupOut, EventIn
 
 app = FastAPI(title="CodeVAR")
+
+
+def get_project_by_api_key(db: Session, api_key: str) -> Project:
+    project = db.query(Project).filter(Project.api_key == api_key).first()
+    if project is None:
+        raise HTTPException(status_code=401, detail="invalid project api key")
+    return project
 
 
 def get_or_create_error_group(db: Session, project: Project, event: EventIn) -> ErrorGroup:
@@ -57,9 +66,7 @@ def get_or_create_error_group(db: Session, project: Project, event: EventIn) -> 
 
 @app.post("/api/events", status_code=201)
 def create_event(event: EventIn, db: Session = Depends(get_db)):
-    project = db.query(Project).filter(Project.api_key == event.project_api_key).first()
-    if project is None:
-        raise HTTPException(status_code=401, detail="invalid project api key")
+    project = get_project_by_api_key(db, event.project_api_key)
 
     error_group = get_or_create_error_group(db, project, event)
 
@@ -74,3 +81,15 @@ def create_event(event: EventIn, db: Session = Depends(get_db)):
     db.commit()
 
     return {"error_group_id": error_group.id}
+
+
+@app.get("/api/errors", response_model=List[ErrorGroupOut])
+def list_errors(api_key: str, db: Session = Depends(get_db)):
+    project = get_project_by_api_key(db, api_key)
+
+    return (
+        db.query(ErrorGroup)
+        .filter(ErrorGroup.project_id == project.id)
+        .order_by(ErrorGroup.last_seen.desc())
+        .all()
+    )
