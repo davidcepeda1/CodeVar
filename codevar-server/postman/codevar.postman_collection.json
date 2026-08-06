@@ -1,0 +1,77 @@
+{
+  "info": {
+    "name": "CodeVAR - POST /api/events",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "api_key", "value": "abc123" }
+  ],
+  "item": [
+    {
+      "name": "Evento válido - nuevo error group",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/api/events",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_api_key\": \"{{api_key}}\",\n  \"exception_type\": \"ValueError\",\n  \"file_path\": \"app/main.py\",\n  \"line_number\": 42,\n  \"stack_trace\": \"Traceback (most recent call last)...\",\n  \"request_path\": \"/checkout\",\n  \"request_method\": \"POST\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Evento repetido - mismo fingerprint (debe agrupar)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/api/events",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_api_key\": \"{{api_key}}\",\n  \"exception_type\": \"ValueError\",\n  \"file_path\": \"app/main.py\",\n  \"line_number\": 42,\n  \"stack_trace\": \"Traceback (most recent call last)...\",\n  \"request_path\": \"/checkout\",\n  \"request_method\": \"POST\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Evento con distinta línea - nuevo error group",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/api/events",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_api_key\": \"{{api_key}}\",\n  \"exception_type\": \"ValueError\",\n  \"file_path\": \"app/main.py\",\n  \"line_number\": 99,\n  \"stack_trace\": \"Traceback (most recent call last)...\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "API key inválida (esperado 401)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/api/events",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_api_key\": \"clave-inexistente\",\n  \"exception_type\": \"ValueError\",\n  \"file_path\": \"app/main.py\",\n  \"line_number\": 42\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Payload incompleto (esperado 422)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{base_url}}/api/events",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"project_api_key\": \"{{api_key}}\",\n  \"exception_type\": \"ValueError\"\n}"
+        }
+      },
+      "response": []
+    }
+  ]
+}
