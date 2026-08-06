@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Errores — CodeVAR{% endblock %}
+
+{% block content %}
+<h2>Errores</h2>
+
+{% if error_groups %}
+<table>
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Ubicación</th>
+            <th>Frecuencia</th>
+            <th>Último visto</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in error_groups %}
+        <tr>
+            <td><a href="/dashboard/errors/{{ group.id }}?api_key={{ api_key }}">{{ group.exception_type }}</a></td>
+            <td>{{ group.file_path }}:{{ group.line_number }}</td>
+            <td>{{ group.event_count }}</td>
+            <td>{{ group.last_seen }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No hay errores registrados todavía.</p>
+{% endif %}
+{% endblock %}

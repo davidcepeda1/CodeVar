@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func
@@ -90,16 +90,19 @@ def create_event(event: EventIn, db: Session = Depends(get_db)):
     return {"error_group_id": error_group.id}
 
 
-@app.get("/api/errors", response_model=List[ErrorGroupOut])
-def list_errors(api_key: str, db: Session = Depends(get_db)):
-    project = get_project_by_api_key(db, api_key)
-
+def get_error_groups(db: Session, project: Project) -> List[ErrorGroup]:
     return (
         db.query(ErrorGroup)
         .filter(ErrorGroup.project_id == project.id)
         .order_by(ErrorGroup.last_seen.desc())
         .all()
     )
+
+
+@app.get("/api/errors", response_model=List[ErrorGroupOut])
+def list_errors(api_key: str, db: Session = Depends(get_db)):
+    project = get_project_by_api_key(db, api_key)
+    return get_error_groups(db, project)
 
 
 @app.get("/api/errors/{error_group_id}", response_model=ErrorGroupDetailOut)
@@ -115,3 +118,15 @@ def get_error_detail(error_group_id: int, api_key: str, db: Session = Depends(ge
         raise HTTPException(status_code=404, detail="error group not found")
 
     return error_group
+
+
+@app.get("/dashboard")
+def dashboard_errors_list(request: Request, api_key: str, db: Session = Depends(get_db)):
+    project = get_project_by_api_key(db, api_key)
+    error_groups = get_error_groups(db, project)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="errors_list.html",
+        context={"error_groups": error_groups, "api_key": api_key},
+    )
