@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ error_group.exception_type }} — CodeVAR{% endblock %}
+
+{% block content %}
+<p><a href="/dashboard?api_key={{ api_key }}">&larr; Volver a la lista</a></p>
+
+<h2>{{ error_group.exception_type }}</h2>
+<p>{{ error_group.file_path }}:{{ error_group.line_number }}</p>
+<p>
+    Ocurrencias: {{ error_group.event_count }} ·
+    Primera vez: {{ error_group.first_seen }} ·
+    Última vez: {{ error_group.last_seen }} ·
+    Estado: {{ error_group.status }}
+</p>
+
+<h3>Eventos</h3>
+{% for event in error_group.events %}
+<details>
+    <summary>{{ event.occurred_at }} — {{ event.request_method }} {{ event.request_path }}</summary>
+    <pre>{{ event.stack_trace }}</pre>
+</details>
+{% else %}
+<p>No hay eventos registrados para este grupo.</p>
+{% endfor %}
+{% endblock %}

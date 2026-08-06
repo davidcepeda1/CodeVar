@@ -105,10 +105,7 @@ def list_errors(api_key: str, db: Session = Depends(get_db)):
     return get_error_groups(db, project)
 
 
-@app.get("/api/errors/{error_group_id}", response_model=ErrorGroupDetailOut)
-def get_error_detail(error_group_id: int, api_key: str, db: Session = Depends(get_db)):
-    project = get_project_by_api_key(db, api_key)
-
+def get_error_group_or_404(db: Session, project: Project, error_group_id: int) -> ErrorGroup:
     error_group = (
         db.query(ErrorGroup)
         .filter(ErrorGroup.id == error_group_id, ErrorGroup.project_id == project.id)
@@ -116,8 +113,13 @@ def get_error_detail(error_group_id: int, api_key: str, db: Session = Depends(ge
     )
     if error_group is None:
         raise HTTPException(status_code=404, detail="error group not found")
-
     return error_group
+
+
+@app.get("/api/errors/{error_group_id}", response_model=ErrorGroupDetailOut)
+def get_error_detail(error_group_id: int, api_key: str, db: Session = Depends(get_db)):
+    project = get_project_by_api_key(db, api_key)
+    return get_error_group_or_404(db, project, error_group_id)
 
 
 @app.get("/dashboard")
@@ -129,4 +131,18 @@ def dashboard_errors_list(request: Request, api_key: str, db: Session = Depends(
         request=request,
         name="errors_list.html",
         context={"error_groups": error_groups, "api_key": api_key},
+    )
+
+
+@app.get("/dashboard/errors/{error_group_id}")
+def dashboard_error_detail(
+    error_group_id: int, request: Request, api_key: str, db: Session = Depends(get_db)
+):
+    project = get_project_by_api_key(db, api_key)
+    error_group = get_error_group_or_404(db, project, error_group_id)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="error_detail.html",
+        context={"error_group": error_group, "api_key": api_key},
     )
