@@ -14,6 +14,22 @@
     Estado: <span class="status status-{{ error_group.status }}">{{ error_group.status }}</span>
 </p>
 
+<form
+    class="status-controls"
+    method="post"
+    action="/dashboard/errors/{{ error_group.id }}/status?api_key={{ api_key }}"
+>
+    <button type="submit" name="status" value="resolved" {% if error_group.status == "resolved" %}disabled{% endif %}>
+        Marcar resuelto
+    </button>
+    <button type="submit" name="status" value="ignored" {% if error_group.status == "ignored" %}disabled{% endif %}>
+        Ignorar
+    </button>
+    <button type="submit" name="status" value="unresolved" {% if error_group.status == "unresolved" %}disabled{% endif %}>
+        Reabrir
+    </button>
+</form>
+
 <h3>Eventos</h3>
 {% for event in error_group.events %}
 <details class="event">

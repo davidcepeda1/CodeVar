@@ -1,9 +1,11 @@
 from pathlib import Path
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, Form, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from pydantic import ValidationError
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -122,6 +124,13 @@ def get_error_detail(error_group_id: int, api_key: str, db: Session = Depends(ge
     return get_error_group_or_404(db, project, error_group_id)
 
 
+def set_error_status(db: Session, error_group: ErrorGroup, status: str) -> ErrorGroup:
+    error_group.status = status
+    db.commit()
+    db.refresh(error_group)
+    return error_group
+
+
 @app.patch("/api/errors/{error_group_id}", response_model=ErrorGroupOut)
 def update_error_status(
     error_group_id: int,
@@ -131,12 +140,7 @@ def update_error_status(
 ):
     project = get_project_by_api_key(db, api_key)
     error_group = get_error_group_or_404(db, project, error_group_id)
-
-    error_group.status = update.status
-    db.commit()
-    db.refresh(error_group)
-
-    return error_group
+    return set_error_status(db, error_group, update.status)
 
 
 @app.get("/dashboard")
@@ -162,4 +166,27 @@ def dashboard_error_detail(
         request=request,
         name="error_detail.html",
         context={"error_group": error_group, "api_key": api_key},
+    )
+
+
+@app.post("/dashboard/errors/{error_group_id}/status")
+def dashboard_update_error_status(
+    error_group_id: int,
+    api_key: str,
+    status: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    project = get_project_by_api_key(db, api_key)
+    error_group = get_error_group_or_404(db, project, error_group_id)
+
+    try:
+        valid_status = ErrorStatusUpdate(status=status).status
+    except ValidationError:
+        raise HTTPException(status_code=400, detail="invalid status value")
+
+    set_error_status(db, error_group, valid_status)
+
+    return RedirectResponse(
+        url=f"/dashboard/errors/{error_group_id}?api_key={api_key}",
+        status_code=303,
     )
