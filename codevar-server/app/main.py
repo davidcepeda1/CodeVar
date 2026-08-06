@@ -1,5 +1,6 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -35,7 +36,22 @@ def get_or_create_error_group(db: Session, project: Project, event: EventIn) -> 
         line_number=event.line_number,
     )
     db.add(error_group)
-    db.flush()
+    try:
+        db.flush()
+    except IntegrityError:
+        # otro evento con el mismo fingerprint se insertó primero (condición de carrera)
+        db.rollback()
+        error_group = (
+            db.query(ErrorGroup)
+            .filter(
+                ErrorGroup.project_id == project.id,
+                ErrorGroup.fingerprint == fingerprint,
+            )
+            .one()
+        )
+        error_group.event_count += 1
+        error_group.last_seen = func.now()
+
     return error_group
 
 
