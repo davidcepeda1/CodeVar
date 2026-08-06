@@ -199,6 +199,7 @@ def dashboard_errors_list(
             "project": project,
             "new_project": new,
             "error": error,
+            "server_url": str(request.base_url).rstrip("/"),
         },
     )
 

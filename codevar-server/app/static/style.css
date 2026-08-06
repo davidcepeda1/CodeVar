@@ -561,6 +561,7 @@ code {
     justify-content: space-between;
     gap: 1rem;
     flex-wrap: wrap;
+    margin-bottom: 1.75rem;
 }
 
 .page-header h2 {
@@ -635,7 +636,34 @@ code {
     border-radius: var(--radius-md);
     padding: 0.9rem;
     box-shadow: var(--shadow);
+    width: max-content;
     min-width: 240px;
+    max-width: min(320px, calc(100vw - 3rem));
+}
+
+@media (max-width: 640px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .new-project,
+    .rename-project {
+        width: 100%;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .new-project-form {
+        position: static;
+        margin-top: 0.6rem;
+        width: 100%;
+        max-width: none;
+    }
 }
 
 .new-project-form input {
@@ -674,22 +702,65 @@ code {
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--surface);
-    padding: 0.9rem 1.1rem;
-    margin-bottom: 1.5rem;
+    padding: 0.5rem 1.1rem;
+    margin: 0 0 1.75rem;
+    transition: border-color 150ms var(--ease);
+}
+
+.connection-panel:hover {
+    border-color: var(--border-strong);
 }
 
 .connection-panel summary {
     cursor: pointer;
     font-weight: 600;
     list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.65rem 0;
 }
 
 .connection-panel summary::-webkit-details-marker {
     display: none;
 }
 
+.connection-panel summary .chevron {
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 5px solid var(--muted);
+    transition: transform 150ms var(--ease);
+    flex: none;
+}
+
+.connection-panel[open] summary .chevron {
+    transform: rotate(90deg);
+}
+
+.connection-panel summary .plug-icon {
+    color: var(--accent-strong);
+    flex: none;
+}
+
+.connection-panel summary .hint {
+    margin-left: auto;
+    color: var(--muted-dim);
+    font-weight: 400;
+    font-size: 0.78rem;
+}
+
+.connection-panel[open] summary .hint {
+    display: none;
+}
+
 .connection-panel[open] summary {
-    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.connection-panel[open] {
+    padding-bottom: 1.1rem;
 }
 
 .key-row {
