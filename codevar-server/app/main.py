@@ -1,6 +1,9 @@
+from pathlib import Path
 from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -10,7 +13,11 @@ from app.fingerprint import compute_fingerprint
 from app.models import ErrorEvent, ErrorGroup, Project
 from app.schemas import ErrorGroupDetailOut, ErrorGroupOut, EventIn
 
+APP_DIR = Path(__file__).resolve().parent
+
 app = FastAPI(title="CodeVAR")
+app.mount("/static", StaticFiles(directory=APP_DIR / "static"), name="static")
+templates = Jinja2Templates(directory=APP_DIR / "templates")
 
 
 def get_project_by_api_key(db: Session, api_key: str) -> Project:
