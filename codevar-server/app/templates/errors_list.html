@@ -6,27 +6,36 @@
 <h2>Errores</h2>
 
 {% if error_groups %}
-<table class="error-table">
-    <thead>
-        <tr>
-            <th>Tipo</th>
-            <th>Ubicación</th>
-            <th>Frecuencia</th>
-            <th>Último visto</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for group in error_groups %}
-        <tr>
-            <td><a href="/dashboard/errors/{{ group.id }}?api_key={{ api_key }}" class="error-type">{{ group.exception_type }}</a></td>
-            <td><code>{{ group.file_path }}:{{ group.line_number }}</code></td>
-            <td><span class="badge">{{ group.event_count }}</span></td>
-            <td class="muted">{{ group.last_seen }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="table-wrap">
+    <table class="error-table">
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Ubicación</th>
+                <th>Frecuencia</th>
+                <th>Último visto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in error_groups %}
+            <tr>
+                <td data-label="Tipo"><a href="/dashboard/errors/{{ group.id }}?api_key={{ api_key }}" class="error-type">{{ group.exception_type }}</a></td>
+                <td data-label="Ubicación" title="{{ group.file_path }}:{{ group.line_number }}">
+                    <code class="path-cell">{{ group.file_path }}:{{ group.line_number }}</code>
+                </td>
+                <td data-label="Frecuencia"><span class="badge">{{ group.event_count }}</span></td>
+                <td data-label="Último visto" class="muted">{{ group.last_seen }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% else %}
-<p class="empty-state">No hay errores registrados todavía.</p>
+<div class="empty-state">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <p>No hay errores registrados todavía.</p>
+</div>
 {% endif %}
 {% endblock %}

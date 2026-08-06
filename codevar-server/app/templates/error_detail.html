@@ -3,7 +3,7 @@
 {% block title %}{{ error_group.exception_type }} — CodeVAR{% endblock %}
 
 {% block content %}
-<p><a href="/dashboard?api_key={{ api_key }}" class="back-link">&larr; Volver a la lista</a></p>
+<a href="/dashboard?api_key={{ api_key }}" class="back-link">&larr; Volver a la lista</a>
 
 <h2>{{ error_group.exception_type }}</h2>
 <p><code>{{ error_group.file_path }}:{{ error_group.line_number }}</code></p>
@@ -11,7 +11,7 @@
     Ocurrencias: <span class="badge">{{ error_group.event_count }}</span> ·
     Primera vez: {{ error_group.first_seen }} ·
     Última vez: {{ error_group.last_seen }} ·
-    Estado: <span class="status status-{{ error_group.status }}">{{ error_group.status }}</span>
+    Estado: <span class="status status-{{ error_group.status }}"><span class="status-dot"></span>{{ error_group.status }}</span>
 </p>
 
 <form
@@ -34,10 +34,18 @@
 {% for event in error_group.events %}
 <details class="event">
     <summary>{{ event.occurred_at }} — {{ event.request_method }} {{ event.request_path }}</summary>
-    <button type="button" class="copy-btn" onclick="codevarCopyStackTrace(this)">Copiar</button>
+    <button type="button" class="copy-btn" onclick="codevarCopyStackTrace(this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/>
+            <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="2"/>
+        </svg>
+        <span class="copy-label">Copiar</span>
+    </button>
     <pre class="stack-trace">{{ event.stack_trace }}</pre>
 </details>
 {% else %}
-<p class="empty-state">No hay eventos registrados para este grupo.</p>
+<div class="empty-state">
+    <p>No hay eventos registrados para este grupo.</p>
+</div>
 {% endfor %}
 {% endblock %}

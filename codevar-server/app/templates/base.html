@@ -4,11 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}CodeVAR{% endblock %}</title>
+    <meta name="description" content="Mini error-tracker para aplicaciones FastAPI: captura, agrupa y expone excepciones no manejadas.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='7' y='3' width='16' height='24' rx='3' fill='%23e5484d' transform='rotate(8 16 16)'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <header class="site-header">
-        <h1><a href="/">🟥 CodeVAR</a></h1>
+        <a href="/" class="brand">
+            <span class="brand-mark" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4" y="1.5" width="12" height="17" rx="2.5" fill="currentColor" transform="rotate(8 10 10)"/>
+                </svg>
+            </span>
+            <span class="brand-word">Code<strong>VAR</strong></span>
+        </a>
+        <nav class="site-nav">
+            <a href="/dashboard?api_key={{ api_key }}" class="{% if request.url.path.startswith('/dashboard') %}active{% endif %}">Errores</a>
+        </nav>
     </header>
     <main class="container">
         {% block content %}{% endblock %}

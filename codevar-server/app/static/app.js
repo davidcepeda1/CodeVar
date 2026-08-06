@@ -1,10 +1,11 @@
 function codevarCopyStackTrace(button) {
     const pre = button.nextElementSibling;
+    const label = button.querySelector(".copy-label") || button;
     navigator.clipboard.writeText(pre.textContent).then(() => {
-        const original = button.textContent;
-        button.textContent = "Copiado";
+        const original = label.textContent;
+        label.textContent = "Copiado";
         setTimeout(() => {
-            button.textContent = original;
+            label.textContent = original;
         }, 1500);
     });
 }
