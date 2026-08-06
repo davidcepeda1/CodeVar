@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -26,3 +26,18 @@ class ErrorGroupOut(BaseModel):
     last_seen: Optional[datetime]
     event_count: int
     status: str
+
+
+class ErrorEventOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    stack_trace: Optional[str]
+    request_path: Optional[str]
+    request_method: Optional[str]
+    occurred_at: Optional[datetime]
+    extra_context: Optional[dict]
+
+
+class ErrorGroupDetailOut(ErrorGroupOut):
+    events: List[ErrorEventOut]

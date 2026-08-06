@@ -8,7 +8,7 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
@@ -35,6 +35,12 @@ class ErrorGroup(Base):
     last_seen = Column(DateTime, server_default=func.now())
     event_count = Column(Integer, default=1)
     status = Column(String(20), default="unresolved")
+
+    events = relationship(
+        "ErrorEvent",
+        order_by="ErrorEvent.occurred_at.desc()",
+        cascade="all, delete-orphan",
+    )
 
     __table_args__ = (UniqueConstraint("project_id", "fingerprint"),)
 

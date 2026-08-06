@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.fingerprint import compute_fingerprint
 from app.models import ErrorEvent, ErrorGroup, Project
-from app.schemas import ErrorGroupOut, EventIn
+from app.schemas import ErrorGroupDetailOut, ErrorGroupOut, EventIn
 
 app = FastAPI(title="CodeVAR")
 
@@ -93,3 +93,18 @@ def list_errors(api_key: str, db: Session = Depends(get_db)):
         .order_by(ErrorGroup.last_seen.desc())
         .all()
     )
+
+
+@app.get("/api/errors/{error_group_id}", response_model=ErrorGroupDetailOut)
+def get_error_detail(error_group_id: int, api_key: str, db: Session = Depends(get_db)):
+    project = get_project_by_api_key(db, api_key)
+
+    error_group = (
+        db.query(ErrorGroup)
+        .filter(ErrorGroup.id == error_group_id, ErrorGroup.project_id == project.id)
+        .first()
+    )
+    if error_group is None:
+        raise HTTPException(status_code=404, detail="error group not found")
+
+    return error_group
