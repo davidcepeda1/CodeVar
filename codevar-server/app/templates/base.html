@@ -19,7 +19,10 @@
             <span class="brand-word">Code<strong>VAR</strong></span>
         </a>
         <nav class="site-nav">
+            <a href="/" class="{% if request.url.path == '/' %}active{% endif %}">Proyectos</a>
+            {% if api_key %}
             <a href="/dashboard?api_key={{ api_key }}" class="{% if request.url.path.startswith('/dashboard') %}active{% endif %}">Errores</a>
+            {% endif %}
         </nav>
     </header>
     <main class="container">

@@ -508,3 +508,47 @@ code {
 .empty-state p {
     margin: 0;
 }
+
+/* projects overview */
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.85rem;
+    margin-top: 1.25rem;
+}
+
+.project-card {
+    display: block;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.1rem 1.25rem;
+    transition: border-color 150ms var(--ease), transform 150ms var(--ease), box-shadow 150ms var(--ease);
+}
+
+.project-card:hover {
+    text-decoration: none;
+    color: var(--text);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.project-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.project-name {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.project-card p {
+    margin: 0.6rem 0 0;
+    font-size: 0.85rem;
+}

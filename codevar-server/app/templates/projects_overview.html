@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Proyectos — CodeVAR{% endblock %}
+
+{% block content %}
+<h2>Proyectos</h2>
+
+{% if overview %}
+<div class="project-grid">
+    {% for item in overview %}
+    <a class="project-card" href="/dashboard?api_key={{ item.project.api_key }}">
+        <div class="project-card-header">
+            <span class="project-name">{{ item.project.name }}</span>
+            <span class="badge">{{ item.error_count }}</span>
+        </div>
+        <p class="muted">
+            {% if item.last_seen %}
+                Última actividad: {{ item.last_seen }}
+            {% else %}
+                Sin errores registrados
+            {% endif %}
+        </p>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No hay proyectos registrados todavía.</p>
+</div>
+{% endif %}
+{% endblock %}

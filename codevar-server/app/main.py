@@ -143,6 +143,28 @@ def update_error_status(
     return set_error_status(db, error_group, update.status)
 
 
+@app.get("/")
+def dashboard_projects_overview(request: Request, db: Session = Depends(get_db)):
+    projects = db.query(Project).order_by(Project.name).all()
+
+    overview = []
+    for project in projects:
+        error_groups = get_error_groups(db, project)
+        overview.append(
+            {
+                "project": project,
+                "error_count": len(error_groups),
+                "last_seen": error_groups[0].last_seen if error_groups else None,
+            }
+        )
+
+    return templates.TemplateResponse(
+        request=request,
+        name="projects_overview.html",
+        context={"overview": overview},
+    )
+
+
 @app.get("/dashboard")
 def dashboard_errors_list(request: Request, api_key: str, db: Session = Depends(get_db)):
     project = get_project_by_api_key(db, api_key)
