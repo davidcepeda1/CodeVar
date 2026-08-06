@@ -3,7 +3,19 @@
 {% block title %}Proyectos — CodeVAR{% endblock %}
 
 {% block content %}
-<h2>Proyectos</h2>
+<div class="page-header">
+    <h2>Proyectos</h2>
+    <details class="new-project" {% if error %}open{% endif %}>
+        <summary class="btn-primary">+ Nuevo proyecto</summary>
+        <form method="post" action="/projects" class="new-project-form">
+            {% if error == "duplicate_name" %}
+            <p class="form-error">Ya existe un proyecto con ese nombre. Prueba con otro.</p>
+            {% endif %}
+            <input type="text" name="name" placeholder="Nombre del proyecto" required maxlength="100" autofocus>
+            <button type="submit">Crear</button>
+        </form>
+    </details>
+</div>
 
 {% if overview %}
 <div class="project-grid">

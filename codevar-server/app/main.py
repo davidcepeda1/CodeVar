@@ -1,3 +1,4 @@
+import secrets
 from pathlib import Path
 from typing import List
 
@@ -144,7 +145,7 @@ def update_error_status(
 
 
 @app.get("/")
-def dashboard_projects_overview(request: Request, db: Session = Depends(get_db)):
+def dashboard_projects_overview(request: Request, error: str = None, db: Session = Depends(get_db)):
     projects = db.query(Project).order_by(Project.name).all()
 
     overview = []
@@ -161,19 +162,39 @@ def dashboard_projects_overview(request: Request, db: Session = Depends(get_db))
     return templates.TemplateResponse(
         request=request,
         name="projects_overview.html",
-        context={"overview": overview},
+        context={"overview": overview, "error": error},
     )
 
 
+@app.post("/projects")
+def create_project(name: str = Form(...), db: Session = Depends(get_db)):
+    project = Project(name=name, api_key=secrets.token_hex(32))
+    db.add(project)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return RedirectResponse(url="/?error=duplicate_name", status_code=303)
+
+    return RedirectResponse(url=f"/dashboard?api_key={project.api_key}&new=1", status_code=303)
+
+
 @app.get("/dashboard")
-def dashboard_errors_list(request: Request, api_key: str, db: Session = Depends(get_db)):
+def dashboard_errors_list(
+    request: Request, api_key: str, new: bool = False, db: Session = Depends(get_db)
+):
     project = get_project_by_api_key(db, api_key)
     error_groups = get_error_groups(db, project)
 
     return templates.TemplateResponse(
         request=request,
         name="errors_list.html",
-        context={"error_groups": error_groups, "api_key": api_key},
+        context={
+            "error_groups": error_groups,
+            "api_key": api_key,
+            "project": project,
+            "new_project": new,
+        },
     )
 
 

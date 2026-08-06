@@ -5,6 +5,33 @@
 {% block content %}
 <h2>Errores</h2>
 
+<details class="connection-panel" {% if new_project %}open{% endif %}>
+    <summary>
+        {% if new_project %}✅ Proyecto creado — cómo conectarlo{% else %}Cómo conectar este proyecto{% endif %}
+    </summary>
+    <p class="muted">api_key de <strong>{{ project.name }}</strong>:</p>
+    <div class="key-row">
+        <code id="project-api-key">{{ api_key }}</code>
+        <button type="button" class="copy-btn" onclick="codevarCopyById(this, 'project-api-key')">
+            <span class="copy-label">Copiar</span>
+        </button>
+    </div>
+    <p class="muted">Agrega esto en tu app FastAPI (<code>main.py</code>):</p>
+    <pre id="project-snippet" class="stack-trace">from codevar_client.config import CodevarConfig
+from codevar_client.middleware import CodevarMiddleware
+
+app.add_middleware(
+    CodevarMiddleware,
+    config=CodevarConfig(
+        server_url="http://localhost:8000",
+        api_key="{{ api_key }}",
+    ),
+)</pre>
+    <button type="button" class="copy-btn" onclick="codevarCopyById(this, 'project-snippet')">
+        <span class="copy-label">Copiar snippet</span>
+    </button>
+</details>
+
 {% if error_groups %}
 <div class="table-wrap">
     <table class="error-table">
