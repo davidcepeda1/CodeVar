@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.fingerprint import compute_fingerprint
 from app.models import ErrorEvent, ErrorGroup, Project
-from app.schemas import ErrorGroupDetailOut, ErrorGroupOut, EventIn
+from app.schemas import ErrorGroupDetailOut, ErrorGroupOut, ErrorStatusUpdate, EventIn
 
 APP_DIR = Path(__file__).resolve().parent
 
@@ -120,6 +120,23 @@ def get_error_group_or_404(db: Session, project: Project, error_group_id: int) -
 def get_error_detail(error_group_id: int, api_key: str, db: Session = Depends(get_db)):
     project = get_project_by_api_key(db, api_key)
     return get_error_group_or_404(db, project, error_group_id)
+
+
+@app.patch("/api/errors/{error_group_id}", response_model=ErrorGroupOut)
+def update_error_status(
+    error_group_id: int,
+    update: ErrorStatusUpdate,
+    api_key: str,
+    db: Session = Depends(get_db),
+):
+    project = get_project_by_api_key(db, api_key)
+    error_group = get_error_group_or_404(db, project, error_group_id)
+
+    error_group.status = update.status
+    db.commit()
+    db.refresh(error_group)
+
+    return error_group
 
 
 @app.get("/dashboard")

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -41,3 +41,7 @@ class ErrorEventOut(BaseModel):
 
 class ErrorGroupDetailOut(ErrorGroupOut):
     events: List[ErrorEventOut]
+
+
+class ErrorStatusUpdate(BaseModel):
+    status: Literal["unresolved", "resolved", "ignored"]
