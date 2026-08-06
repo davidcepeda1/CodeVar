@@ -6,7 +6,7 @@
 <h2>Errores</h2>
 
 {% if error_groups %}
-<table>
+<table class="error-table">
     <thead>
         <tr>
             <th>Tipo</th>
@@ -18,15 +18,15 @@
     <tbody>
         {% for group in error_groups %}
         <tr>
-            <td><a href="/dashboard/errors/{{ group.id }}?api_key={{ api_key }}">{{ group.exception_type }}</a></td>
-            <td>{{ group.file_path }}:{{ group.line_number }}</td>
-            <td>{{ group.event_count }}</td>
-            <td>{{ group.last_seen }}</td>
+            <td><a href="/dashboard/errors/{{ group.id }}?api_key={{ api_key }}" class="error-type">{{ group.exception_type }}</a></td>
+            <td><code>{{ group.file_path }}:{{ group.line_number }}</code></td>
+            <td><span class="badge">{{ group.event_count }}</span></td>
+            <td class="muted">{{ group.last_seen }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
-<p>No hay errores registrados todavía.</p>
+<p class="empty-state">No hay errores registrados todavía.</p>
 {% endif %}
 {% endblock %}
