@@ -4,6 +4,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 
 from .config import CodevarConfig
+from .traceback_utils import extract_exception_info
 
 logger = logging.getLogger("codevar_client")
 
@@ -21,4 +22,10 @@ class CodevarMiddleware(BaseHTTPMiddleware):
             raise
 
     def _capture(self, exc: Exception, request: Request) -> None:
-        logger.warning("codevar captured %s: %s", type(exc).__name__, exc)
+        info = extract_exception_info(exc)
+        logger.warning(
+            "codevar captured %s at %s:%s",
+            info.exception_type,
+            info.file_path,
+            info.line_number,
+        )
