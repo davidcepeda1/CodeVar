@@ -34,6 +34,7 @@
 {% for event in error_group.events %}
 <details class="event">
     <summary>{{ event.occurred_at }} — {{ event.request_method }} {{ event.request_path }}</summary>
+    <button type="button" class="copy-btn" onclick="codevarCopyStackTrace(this)">Copiar</button>
     <pre class="stack-trace">{{ event.stack_trace }}</pre>
 </details>
 {% else %}
