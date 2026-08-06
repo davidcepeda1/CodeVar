@@ -218,6 +218,25 @@ def dashboard_rename_project(api_key: str, name: str = Form(...), db: Session = 
     return RedirectResponse(url=f"/dashboard?api_key={api_key}", status_code=303)
 
 
+@app.post("/dashboard/projects/delete")
+def dashboard_delete_project(
+    api_key: str, confirm_name: str = Form(...), db: Session = Depends(get_db)
+):
+    project = get_project_by_api_key(db, api_key)
+
+    if confirm_name != project.name:
+        return RedirectResponse(
+            url=f"/dashboard?api_key={api_key}&error=confirm_mismatch", status_code=303
+        )
+
+    for group in db.query(ErrorGroup).filter(ErrorGroup.project_id == project.id):
+        db.delete(group)
+    db.delete(project)
+    db.commit()
+
+    return RedirectResponse(url="/", status_code=303)
+
+
 @app.get("/dashboard/errors/{error_group_id}")
 def dashboard_error_detail(
     error_group_id: int, request: Request, api_key: str, db: Session = Depends(get_db)

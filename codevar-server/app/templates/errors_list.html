@@ -5,7 +5,7 @@
 {% block content %}
 <div class="page-header">
     <h2>{{ project.name }}</h2>
-    <details class="rename-project" {% if error %}open{% endif %}>
+    <details class="rename-project" {% if error == "duplicate_name" %}open{% endif %}>
         <summary class="btn-secondary">Renombrar</summary>
         <form method="post" action="/dashboard/projects/rename?api_key={{ api_key }}" class="new-project-form">
             {% if error == "duplicate_name" %}
@@ -78,4 +78,32 @@ app.add_middleware(
     <p>No hay errores registrados todavía.</p>
 </div>
 {% endif %}
+
+<div class="danger-zone">
+    <h3>Zona de peligro</h3>
+    <p class="muted">
+        Elimina <strong>{{ project.name }}</strong> junto con todos sus errores y eventos.
+        Esta acción no se puede deshacer.
+    </p>
+    <form method="post" action="/dashboard/projects/delete?api_key={{ api_key }}" class="delete-project-form">
+        {% if error == "confirm_mismatch" %}
+        <p class="form-error">El nombre no coincide. Escríbelo exactamente para confirmar.</p>
+        {% endif %}
+        <label for="confirm_name" class="muted">
+            Escribe <strong>{{ project.name }}</strong> para confirmar:
+        </label>
+        <div class="key-row">
+            <input
+                type="text"
+                id="confirm_name"
+                name="confirm_name"
+                required
+                autocomplete="off"
+                data-expected-name="{{ project.name }}"
+                oninput="document.getElementById('delete-submit').disabled = (this.value !== this.dataset.expectedName)"
+            >
+            <button type="submit" id="delete-submit" class="btn-danger" disabled>Eliminar definitivamente</button>
+        </div>
+    </form>
+</div>
 {% endblock %}
