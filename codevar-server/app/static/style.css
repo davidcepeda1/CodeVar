@@ -567,8 +567,33 @@ code {
     margin: 0;
 }
 
-.new-project {
+.new-project,
+.rename-project {
     position: relative;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    list-style: none;
+    cursor: pointer;
+    background: var(--surface);
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: color 150ms var(--ease), border-color 150ms var(--ease);
+}
+
+.btn-secondary::-webkit-details-marker {
+    display: none;
+}
+
+.btn-secondary:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
 }
 
 .btn-primary {

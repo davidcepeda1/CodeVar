@@ -181,7 +181,11 @@ def create_project(name: str = Form(...), db: Session = Depends(get_db)):
 
 @app.get("/dashboard")
 def dashboard_errors_list(
-    request: Request, api_key: str, new: bool = False, db: Session = Depends(get_db)
+    request: Request,
+    api_key: str,
+    new: bool = False,
+    error: str = None,
+    db: Session = Depends(get_db),
 ):
     project = get_project_by_api_key(db, api_key)
     error_groups = get_error_groups(db, project)
@@ -194,8 +198,24 @@ def dashboard_errors_list(
             "api_key": api_key,
             "project": project,
             "new_project": new,
+            "error": error,
         },
     )
+
+
+@app.post("/dashboard/projects/rename")
+def dashboard_rename_project(api_key: str, name: str = Form(...), db: Session = Depends(get_db)):
+    project = get_project_by_api_key(db, api_key)
+    project.name = name
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return RedirectResponse(
+            url=f"/dashboard?api_key={api_key}&error=duplicate_name", status_code=303
+        )
+
+    return RedirectResponse(url=f"/dashboard?api_key={api_key}", status_code=303)
 
 
 @app.get("/dashboard/errors/{error_group_id}")

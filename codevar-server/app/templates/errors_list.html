@@ -1,9 +1,21 @@
 {% extends "base.html" %}
 
-{% block title %}Errores — CodeVAR{% endblock %}
+{% block title %}{{ project.name }} — CodeVAR{% endblock %}
 
 {% block content %}
-<h2>Errores</h2>
+<div class="page-header">
+    <h2>{{ project.name }}</h2>
+    <details class="rename-project" {% if error %}open{% endif %}>
+        <summary class="btn-secondary">Renombrar</summary>
+        <form method="post" action="/dashboard/projects/rename?api_key={{ api_key }}" class="new-project-form">
+            {% if error == "duplicate_name" %}
+            <p class="form-error">Ya existe un proyecto con ese nombre.</p>
+            {% endif %}
+            <input type="text" name="name" value="{{ project.name }}" required maxlength="100">
+            <button type="submit">Guardar</button>
+        </form>
+    </details>
+</div>
 
 <details class="connection-panel" {% if new_project %}open{% endif %}>
     <summary>
@@ -32,6 +44,7 @@ app.add_middleware(
     </button>
 </details>
 
+<h3>Errores</h3>
 {% if error_groups %}
 <div class="table-wrap">
     <table class="error-table">
