@@ -11,9 +11,9 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.database import engine, get_db
 from app.fingerprint import compute_fingerprint
-from app.models import ErrorEvent, ErrorGroup, Project
+from app.models import Base, ErrorEvent, ErrorGroup, Project
 from app.schemas import ErrorGroupDetailOut, ErrorGroupOut, ErrorStatusUpdate, EventIn
 
 APP_DIR = Path(__file__).resolve().parent
@@ -21,6 +21,11 @@ APP_DIR = Path(__file__).resolve().parent
 app = FastAPI(title="CodeVAR")
 app.mount("/static", StaticFiles(directory=APP_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=APP_DIR / "templates")
+
+
+@app.on_event("startup")
+def create_tables():
+    Base.metadata.create_all(bind=engine)
 
 
 def get_project_by_api_key(db: Session, api_key: str) -> Project:
