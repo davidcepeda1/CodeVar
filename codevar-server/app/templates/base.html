@@ -1,33 +1,42 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block title %}CodeVAR{% endblock %}</title>
-    <meta name="description" content="Mini error-tracker para aplicaciones FastAPI: captura, agrupa y expone excepciones no manejadas.">
-    <link rel="icon" type="image/png" href="/static/CodeVar.png">
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
+    <meta
+      name="description"
+      content="Mini error-tracker para aplicaciones FastAPI: captura, agrupa y expone excepciones no manejadas."
+    />
+    <link rel="icon" type="image/png" href="/static/CodeVarIco.png" />
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
     <header class="site-header">
-        <a href="/" class="brand">
-            <span class="brand-mark" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="4" y="1.5" width="12" height="17" rx="2.5" fill="currentColor" transform="rotate(8 10 10)"/>
-                </svg>
-            </span>
-            <span class="brand-word">Code<strong>VAR</strong></span>
-        </a>
-        <nav class="site-nav">
-            <a href="/" class="{% if request.url.path == '/' %}active{% endif %}">Proyectos</a>
-            {% if api_key %}
-            <a href="/dashboard?api_key={{ api_key }}" class="{% if request.url.path.startswith('/dashboard') %}active{% endif %}">Errores</a>
-            {% endif %}
-        </nav>
+      <a href="/" class="brand">
+        <img
+          src="/static/CodeVarIco.png"
+          alt="CodeVAR"
+          class="brand-mark"
+          width="28"
+          height="28"
+        />
+        <span class="brand-word">Code<strong>VAR</strong></span>
+      </a>
+      <nav class="site-nav">
+        <a href="/" class="{% if request.url.path == '/' %}active{% endif %}"
+          >Proyectos</a
+        >
+        {% if api_key %}
+        <a
+          href="/dashboard?api_key={{ api_key }}"
+          class="{% if request.url.path.startswith('/dashboard') %}active{% endif %}"
+          >Errores</a
+        >
+        {% endif %}
+      </nav>
     </header>
-    <main class="container">
-        {% block content %}{% endblock %}
-    </main>
+    <main class="container">{% block content %}{% endblock %}</main>
     <script src="/static/app.js"></script>
-</body>
+  </body>
 </html>

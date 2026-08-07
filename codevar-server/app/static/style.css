@@ -99,9 +99,11 @@ a:hover {
 }
 
 .brand-mark {
-    color: var(--accent);
-    display: inline-flex;
-    filter: drop-shadow(0 2px 6px rgba(229, 72, 77, 0.35));
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
 }
 
 .brand-word strong {
