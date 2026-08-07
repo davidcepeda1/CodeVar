@@ -33,11 +33,17 @@
             <span class="copy-label">Copiar</span>
         </button>
     </div>
-    <p class="muted">
-        Agrega esto en tu app FastAPI (<code>main.py</code>, después de crear <code>app</code>).
-        <strong>El <code>server_url</code> ya es la dirección real de este CodeVAR</strong> —
-        no la confundas con el puerto donde corre tu propia app:
-    </p>
+    <p class="muted">Agrega esto en tu app FastAPI (<code>main.py</code>, justo después de crear <code>app</code>):</p>
+    <div class="callout">
+        <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 8v.01M12 11.5v4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <p>
+            <strong>El server_url de abajo ya está listo, no lo cambies.</strong>
+            Es la dirección de este CodeVAR — no la de tu propia app.
+        </p>
+    </div>
     <pre id="project-snippet" class="stack-trace">from codevar_client.config import CodevarConfig
 from codevar_client.middleware import CodevarMiddleware
 
