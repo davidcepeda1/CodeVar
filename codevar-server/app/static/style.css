@@ -482,8 +482,12 @@ code {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.82rem;
     color: var(--muted);
-    margin: 0.6rem 0 0;
     line-height: 1.5;
+    margin: 0.6rem 0 0;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 0.9rem;
 }
 
 /* empty state */
