@@ -23,6 +23,7 @@ prueba (no se modifica ningún archivo del repo de backend-canchas).
 """
 import os
 import sys
+from datetime import date, timedelta
 
 BACKEND_CANCHAS_PATH = os.environ.get(
     "BACKEND_CANCHAS_PATH",
@@ -81,7 +82,7 @@ def run():
         "/reservas/",
         json={
             "cancha_id": cancha_id,
-            "fecha": "2026-08-10",
+            "fecha": (date.today() + timedelta(days=1)).isoformat(),
             "hora_inicio": "10:00:00",
             "hora_fin": "11:00:00",
             "nombre_cliente": "David",

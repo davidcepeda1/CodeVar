@@ -8,6 +8,10 @@
   Mini error-tracker para aplicaciones Python/FastAPI, inspirado en Sentry.
 </p>
 
+<p align="center">
+  <strong><a href="https://codevar.onrender.com">codevar.onrender.com</a></strong> — demo en vivo
+</p>
+
 ---
 
 ## Qué es

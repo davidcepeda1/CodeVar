@@ -235,8 +235,6 @@ def dashboard_delete_project(
             url=f"/dashboard?api_key={api_key}&error=confirm_mismatch", status_code=303
         )
 
-    for group in db.query(ErrorGroup).filter(ErrorGroup.project_id == project.id):
-        db.delete(group)
     db.delete(project)
     db.commit()
 

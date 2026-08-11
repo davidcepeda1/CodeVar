@@ -21,6 +21,8 @@ class Project(Base):
     api_key = Column(String(64), unique=True, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
+    error_groups = relationship("ErrorGroup", cascade="all, delete-orphan")
+
 
 class ErrorGroup(Base):
     __tablename__ = "error_groups"
