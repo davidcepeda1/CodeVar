@@ -42,6 +42,37 @@ codevar-server   →  API de ingesta + agrupación por fingerprint
                        detalle con stack trace, marcar resuelto/ignorado
 ```
 
+## Demo
+
+Flujo real (no simulado): se crea un proyecto, se conecta una app FastAPI real (`backend-canchas`), ocurre un bug genuino en producción, y aparece en el dashboard.
+
+![Demo de CodeVAR: crear proyecto, conectar una app, un error real ocurre y aparece en el dashboard](demo.gif)
+
+## Prueba tu propia app
+
+1. Entra a [codevar.onrender.com](https://codevar.onrender.com) y crea un proyecto (**+ Nuevo proyecto**) — te muestra la `api_key` generada.
+2. Instala el cliente en la app FastAPI que quieres monitorear:
+   ```bash
+   pip install -e /ruta/a/codevar-client
+   ```
+3. Agrega el middleware (el propio dashboard te da este snippet con tu `api_key` ya completada):
+   ```python
+   from fastapi import FastAPI
+   from codevar_client.middleware import CodevarMiddleware
+   from codevar_client.config import CodevarConfig
+
+   app = FastAPI()
+
+   app.add_middleware(
+       CodevarMiddleware,
+       config=CodevarConfig(
+           server_url="https://codevar.onrender.com",
+           api_key="la-api-key-de-tu-proyecto",
+       ),
+   )
+   ```
+4. Cualquier excepción no manejada en un endpoint aparece sola en tu dashboard, agrupada por tipo/archivo/línea.
+
 ## Repositorios de este monorepo
 
 | Carpeta | Qué es |
