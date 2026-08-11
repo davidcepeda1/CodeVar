@@ -20,7 +20,7 @@ Este es un proyecto personal construido por David Cepeda, estudiante de Ingenier
 - **Un solo lenguaje/framework**: Python + FastAPI únicamente. No se construirán SDKs para otros lenguajes en esta fase. El formato del evento (JSON) se diseña de forma agnóstica al lenguaje, dejando la puerta abierta a futuros clientes, pero solo se implementa el cliente Python.
 - **Fingerprinting simple**: agrupación por `hash(tipo_excepción + archivo + línea)`. Nada de análisis semántico sofisticado tipo Sentry.
 - **Dashboard simple**: HTML + Jinja2 server-rendered es suficiente para el MVP. No se requiere React ni frontend separado.
-- **Prueba con proyecto real**: el cliente se instalará en `backend-canchas` (proyecto real y ya desplegado de David) para generar una demo convincente con errores reales, no simulados.
+- **Prueba con proyecto real**: el cliente se instalará en `backend-canchas` (proyecto real y ya desplegado) para generar una demo convincente con errores reales, no simulados.
 
 ## Arquitectura general
 
