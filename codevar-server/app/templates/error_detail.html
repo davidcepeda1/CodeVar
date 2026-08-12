@@ -30,6 +30,52 @@
     </button>
 </form>
 
+<h3>Frecuencia</h3>
+<div class="frequency-chart">
+    {% if chart_bars %}
+    <div class="chart-header">
+        <div class="chart-stat">
+            <span class="chart-stat-value">{{ chart_total }}</span>
+            <span class="chart-stat-label">evento{{ "s" if chart_total != 1 else "" }} en los últimos 14 días</span>
+        </div>
+    </div>
+    <div class="chart-svg-wrap" style="aspect-ratio: {{ chart_width }} / {{ chart_height }};">
+        <svg
+            viewBox="0 0 {{ chart_width }} {{ chart_height }}"
+            class="chart-svg"
+            role="img"
+            aria-label="Eventos por día de este error en los últimos 14 días"
+            preserveAspectRatio="xMidYMax meet"
+        >
+            <defs>
+                <linearGradient id="chart-bar-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" class="chart-gradient-start" />
+                    <stop offset="100%" class="chart-gradient-end" />
+                </linearGradient>
+            </defs>
+            <line x1="0" y1="{{ chart_height }}" x2="{{ chart_width }}" y2="{{ chart_height }}" class="chart-baseline" />
+            {% for bar in chart_bars %}
+            <rect
+                x="{{ bar.x }}"
+                y="{{ bar.y }}"
+                width="12"
+                height="{{ bar.height }}"
+                rx="3"
+                class="chart-bar {% if bar.count == 0 %}chart-bar-empty{% endif %} {% if bar.is_today %}chart-bar-today{% endif %}"
+                onmouseenter="codevarShowChartTooltip(event, '{{ bar.date }}', {{ bar.count }})"
+                onmouseleave="codevarHideChartTooltip()"
+            ></rect>
+            {% endfor %}
+        </svg>
+        <div id="chart-tooltip" class="chart-tooltip" role="tooltip"></div>
+    </div>
+    <div class="chart-labels">
+        <span>{{ chart_bars[0].date }}</span>
+        <span>hoy</span>
+    </div>
+    {% endif %}
+</div>
+
 <h3>Eventos</h3>
 {% for event in error_group.events %}
 <details class="event">
