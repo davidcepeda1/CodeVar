@@ -904,6 +904,7 @@ code {
 .chart-svg-wrap {
     position: relative;
     width: 100%;
+    margin-top: 2.4rem;
 }
 
 .chart-svg {
@@ -918,6 +919,12 @@ code {
     stroke-width: 1;
 }
 
+.chart-gridline {
+    stroke: var(--border);
+    stroke-width: 1;
+    opacity: 0.4;
+}
+
 .chart-gradient-start {
     stop-color: var(--accent-strong);
 }
@@ -929,12 +936,10 @@ code {
 .chart-bar {
     fill: url(#chart-bar-fill);
     filter: drop-shadow(0 2px 4px rgba(229, 72, 77, 0.3));
-    transition: opacity 150ms var(--ease), filter 150ms var(--ease);
-    cursor: default;
-}
-
-.chart-bar:hover {
-    opacity: 0.85;
+    transform-box: fill-box;
+    transform-origin: center bottom;
+    transition: transform 150ms var(--ease), filter 150ms var(--ease), opacity 150ms var(--ease);
+    pointer-events: none;
 }
 
 .chart-bar-empty {
@@ -943,7 +948,33 @@ code {
 }
 
 .chart-bar-today {
-    filter: drop-shadow(0 0 6px rgba(255, 92, 96, 0.55));
+    filter: drop-shadow(0 3px 6px rgba(255, 92, 96, 0.55));
+}
+
+.chart-bar-hit {
+    fill: transparent;
+    cursor: pointer;
+}
+
+.chart-bar-group:hover .chart-bar,
+.chart-bar-group:focus-within .chart-bar {
+    transform: scaleX(1.25);
+    opacity: 0.92;
+}
+
+.chart-bar-hit:focus-visible {
+    fill: var(--accent-soft);
+    outline: 1.5px solid var(--accent-strong);
+    outline-offset: -1px;
+}
+
+.chart-bar-hit-selected {
+    fill: var(--accent-soft);
+}
+
+.chart-bar-group:has(.chart-bar-hit-selected) .chart-bar {
+    stroke: var(--accent-strong);
+    stroke-width: 1.5;
 }
 
 .chart-labels {
@@ -994,4 +1025,50 @@ code {
     .chart-labels {
         font-size: 0.68rem;
     }
+}
+
+/* events filter */
+
+.events-heading-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.events-heading-row h3 {
+    margin: 0;
+}
+
+.events-filter-status {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.events-filter-status strong {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.filter-clear-btn {
+    background: none;
+    border: none;
+    color: var(--accent-strong);
+    font-size: inherit;
+    padding: 0;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.filter-clear-btn:hover {
+    color: var(--text);
+}
+
+#events-empty-filtered .filter-clear-btn {
+    margin-left: 0;
+    font-size: 0.85rem;
 }

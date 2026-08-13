@@ -1,5 +1,5 @@
 import secrets
-from datetime import date, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List
 
@@ -272,7 +272,10 @@ def build_frequency_chart_bars(daily_counts: List[dict]) -> List[dict]:
 
 
 def get_daily_event_counts(db: Session, error_group: ErrorGroup, days: int = 14) -> List[dict]:
-    start_date = date.today() - timedelta(days=days - 1)
+    # occurred_at se guarda en UTC (func.now()); usar la fecha UTC aquí también,
+    # o los eventos recientes en zonas horarias detrás de UTC (ej. Ecuador)
+    # quedarían fechados como "mañana" y caerían fuera del rango.
+    start_date = datetime.now(timezone.utc).date() - timedelta(days=days - 1)
 
     rows = (
         db.query(func.date(ErrorEvent.occurred_at).label("day"), func.count(ErrorEvent.id))
