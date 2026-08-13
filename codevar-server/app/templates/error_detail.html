@@ -39,9 +39,9 @@
             <span class="chart-stat-label">evento{{ "s" if chart_total != 1 else "" }} en los últimos 14 días</span>
         </div>
     </div>
-    <div class="chart-svg-wrap" style="aspect-ratio: {{ chart_width }} / {{ chart_height }};">
+    <div class="chart-svg-wrap" style="aspect-ratio: {{ chart_width }} / {{ svg_height }};">
         <svg
-            viewBox="0 0 {{ chart_width }} {{ chart_height }}"
+            viewBox="0 0 {{ chart_width }} {{ svg_height }}"
             class="chart-svg"
             role="group"
             aria-label="Eventos por día de este error en los últimos 14 días"
@@ -81,6 +81,12 @@
                     onclick="codevarFilterEventsByDate('{{ bar.date }}', this)"
                     onkeydown="codevarHandleBarKeydown(event, '{{ bar.date }}', this)"
                 ></rect>
+                <circle
+                    cx="{{ bar.marker_x }}"
+                    cy="{{ chart_height + 5 }}"
+                    r="2.5"
+                    class="chart-bar-marker"
+                ></circle>
             </g>
             {% endfor %}
         </svg>

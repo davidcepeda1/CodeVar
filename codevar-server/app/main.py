@@ -246,6 +246,7 @@ CHART_BAR_WIDTH = 12
 CHART_BAR_GAP = 5
 CHART_MAX_BAR_HEIGHT = 40
 CHART_BASELINE_Y = 44
+CHART_MARKER_SPACE = 10  # espacio bajo la línea base para el punto de selección
 
 
 def build_frequency_chart_bars(daily_counts: List[dict]) -> List[dict]:
@@ -258,13 +259,15 @@ def build_frequency_chart_bars(daily_counts: List[dict]) -> List[dict]:
         else:
             height = max(4, round((day["count"] / max_count) * CHART_MAX_BAR_HEIGHT))
 
+        x = i * (CHART_BAR_WIDTH + CHART_BAR_GAP)
         bars.append(
             {
                 "date": day["date"],
                 "count": day["count"],
-                "x": i * (CHART_BAR_WIDTH + CHART_BAR_GAP),
+                "x": x,
                 "y": CHART_BASELINE_Y - height,
                 "height": height,
+                "marker_x": x + CHART_BAR_WIDTH / 2,
                 "is_today": i == len(daily_counts) - 1,
             }
         )
@@ -314,6 +317,7 @@ def dashboard_error_detail(
             "chart_total": sum(d["count"] for d in daily_counts),
             "chart_width": len(chart_bars) * (CHART_BAR_WIDTH + CHART_BAR_GAP) - CHART_BAR_GAP,
             "chart_height": CHART_BASELINE_Y,
+            "svg_height": CHART_BASELINE_Y + CHART_MARKER_SPACE,
         },
     )
 
