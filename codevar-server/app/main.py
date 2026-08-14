@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.database import engine, get_db
 from app.fingerprint import compute_fingerprint
 from app.models import Base, ErrorEvent, ErrorGroup, Project
+from app.rate_limit import events_rate_limiter
 from app.schemas import ErrorGroupDetailOut, ErrorGroupOut, ErrorStatusUpdate, EventIn
 
 APP_DIR = Path(__file__).resolve().parent
@@ -83,6 +84,14 @@ def get_or_create_error_group(db: Session, project: Project, event: EventIn) -> 
 @app.post("/api/events", status_code=201)
 def create_event(event: EventIn, db: Session = Depends(get_db)):
     project = get_project_by_api_key(db, event.project_api_key)
+
+    retry_after = events_rate_limiter.check(project.api_key)
+    if retry_after > 0:
+        raise HTTPException(
+            status_code=429,
+            detail="rate limit exceeded",
+            headers={"Retry-After": str(retry_after)},
+        )
 
     error_group = get_or_create_error_group(db, project, event)
 
