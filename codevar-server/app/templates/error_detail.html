@@ -30,22 +30,106 @@
     </button>
 </form>
 
-<h3>Eventos</h3>
-{% for event in error_group.events %}
-<details class="event">
-    <summary>{{ event.occurred_at }} — {{ event.request_method }} {{ event.request_path }}</summary>
-    <button type="button" class="copy-btn" onclick="codevarCopyStackTrace(this)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/>
-            <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="2"/>
+<h3>Frecuencia</h3>
+<div class="frequency-chart">
+    {% if chart_bars %}
+    <div class="chart-header">
+        <div class="chart-stat">
+            <span class="chart-stat-value">{{ chart_total }}</span>
+            <span class="chart-stat-label">evento{{ "s" if chart_total != 1 else "" }} en los últimos 14 días</span>
+        </div>
+    </div>
+    <div class="chart-svg-wrap" style="aspect-ratio: {{ chart_width }} / {{ svg_height }};">
+        <svg
+            viewBox="0 0 {{ chart_width }} {{ svg_height }}"
+            class="chart-svg"
+            role="group"
+            aria-label="Eventos por día de este error en los últimos 14 días"
+            preserveAspectRatio="xMidYMax meet"
+        >
+            <defs>
+                <linearGradient id="chart-bar-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" class="chart-gradient-start" />
+                    <stop offset="100%" class="chart-gradient-end" />
+                </linearGradient>
+            </defs>
+            <line x1="0" y1="2" x2="{{ chart_width }}" y2="2" class="chart-gridline" />
+            <line x1="0" y1="{{ chart_height }}" x2="{{ chart_width }}" y2="{{ chart_height }}" class="chart-baseline" />
+            {% for bar in chart_bars %}
+            <g class="chart-bar-group">
+                <rect
+                    x="{{ bar.x }}"
+                    y="{{ bar.y }}"
+                    width="12"
+                    height="{{ bar.height }}"
+                    rx="3"
+                    class="chart-bar {% if bar.count == 0 %}chart-bar-empty{% endif %} {% if bar.is_today %}chart-bar-today{% endif %}"
+                ></rect>
+                <rect
+                    x="{{ bar.x }}"
+                    y="0"
+                    width="12"
+                    height="{{ chart_height }}"
+                    class="chart-bar-hit"
+                    tabindex="0"
+                    role="button"
+                    aria-label="{{ bar.date }}: {{ bar.count }} evento{{ 's' if bar.count != 1 else '' }}. Filtrar eventos de este día."
+                    onmouseenter="codevarShowChartTooltip(event, '{{ bar.date }}', {{ bar.count }})"
+                    onmouseleave="codevarHideChartTooltip()"
+                    onfocus="codevarShowChartTooltip(event, '{{ bar.date }}', {{ bar.count }})"
+                    onblur="codevarHideChartTooltip()"
+                    onclick="codevarFilterEventsByDate('{{ bar.date }}', this)"
+                    onkeydown="codevarHandleBarKeydown(event, '{{ bar.date }}', this)"
+                ></rect>
+                <circle
+                    cx="{{ bar.marker_x }}"
+                    cy="{{ chart_height + 5 }}"
+                    r="2.5"
+                    class="chart-bar-marker"
+                ></circle>
+            </g>
+            {% endfor %}
         </svg>
-        <span class="copy-label">Copiar</span>
-    </button>
-    <pre class="stack-trace">{{ event.stack_trace }}</pre>
-</details>
+        <div id="chart-tooltip" class="chart-tooltip" role="tooltip"></div>
+    </div>
+    <div class="chart-labels">
+        <span>{{ chart_bars[0].date }}</span>
+        <span>hoy</span>
+    </div>
+    {% endif %}
+</div>
+
+<div class="events-heading-row">
+    <h3>Eventos</h3>
+    <div id="events-filter-status" class="events-filter-status" style="display: none;">
+        Mostrando eventos del <strong class="filter-date"></strong>
+        <button type="button" class="filter-clear-btn" onclick="codevarClearEventFilter()">Ver todos</button>
+    </div>
+</div>
+
+{% if error_group.events %}
+<div id="events-list">
+    {% for event in error_group.events %}
+    <details class="event" data-date="{{ event.occurred_at.strftime('%Y-%m-%d') }}">
+        <summary>{{ event.occurred_at }} — {{ event.request_method }} {{ event.request_path }}</summary>
+        <button type="button" class="copy-btn" onclick="codevarCopyStackTrace(this)">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/>
+                <path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <span class="copy-label">Copiar</span>
+        </button>
+        <pre class="stack-trace">{{ event.stack_trace }}</pre>
+    </details>
+    {% endfor %}
+</div>
+<div id="events-empty-filtered" class="empty-state" style="display: none;">
+    <p>No hay eventos registrados en este día.</p>
+    <button type="button" class="filter-clear-btn" onclick="codevarClearEventFilter()">Ver todos los eventos</button>
+</div>
 {% else %}
 <div class="empty-state">
     <p>No hay eventos registrados para este grupo.</p>
 </div>
-{% endfor %}
+{% endif %}
 {% endblock %}

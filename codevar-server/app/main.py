@@ -1,4 +1,5 @@
 import secrets
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List
 
@@ -241,17 +242,83 @@ def dashboard_delete_project(
     return RedirectResponse(url="/", status_code=303)
 
 
+CHART_BAR_WIDTH = 12
+CHART_BAR_GAP = 5
+CHART_MAX_BAR_HEIGHT = 40
+CHART_BASELINE_Y = 44
+CHART_MARKER_SPACE = 10  # espacio bajo la línea base para el punto de selección
+
+
+def build_frequency_chart_bars(daily_counts: List[dict]) -> List[dict]:
+    max_count = max((d["count"] for d in daily_counts), default=0)
+
+    bars = []
+    for i, day in enumerate(daily_counts):
+        if day["count"] == 0:
+            height = 2
+        else:
+            height = max(4, round((day["count"] / max_count) * CHART_MAX_BAR_HEIGHT))
+
+        x = i * (CHART_BAR_WIDTH + CHART_BAR_GAP)
+        bars.append(
+            {
+                "date": day["date"],
+                "count": day["count"],
+                "x": x,
+                "y": CHART_BASELINE_Y - height,
+                "height": height,
+                "marker_x": x + CHART_BAR_WIDTH / 2,
+                "is_today": i == len(daily_counts) - 1,
+            }
+        )
+    return bars
+
+
+def get_daily_event_counts(db: Session, error_group: ErrorGroup, days: int = 14) -> List[dict]:
+    # occurred_at se guarda en UTC (func.now()); usar la fecha UTC aquí también,
+    # o los eventos recientes en zonas horarias detrás de UTC (ej. Ecuador)
+    # quedarían fechados como "mañana" y caerían fuera del rango.
+    start_date = datetime.now(timezone.utc).date() - timedelta(days=days - 1)
+
+    rows = (
+        db.query(func.date(ErrorEvent.occurred_at).label("day"), func.count(ErrorEvent.id))
+        .filter(ErrorEvent.error_group_id == error_group.id)
+        .filter(func.date(ErrorEvent.occurred_at) >= start_date.isoformat())
+        .group_by("day")
+        .all()
+    )
+    counts_by_day = {str(day): count for day, count in rows}
+
+    return [
+        {
+            "date": (start_date + timedelta(days=i)).isoformat(),
+            "count": counts_by_day.get((start_date + timedelta(days=i)).isoformat(), 0),
+        }
+        for i in range(days)
+    ]
+
+
 @app.get("/dashboard/errors/{error_group_id}")
 def dashboard_error_detail(
     error_group_id: int, request: Request, api_key: str, db: Session = Depends(get_db)
 ):
     project = get_project_by_api_key(db, api_key)
     error_group = get_error_group_or_404(db, project, error_group_id)
+    daily_counts = get_daily_event_counts(db, error_group)
+    chart_bars = build_frequency_chart_bars(daily_counts)
 
     return templates.TemplateResponse(
         request=request,
         name="error_detail.html",
-        context={"error_group": error_group, "api_key": api_key},
+        context={
+            "error_group": error_group,
+            "api_key": api_key,
+            "chart_bars": chart_bars,
+            "chart_total": sum(d["count"] for d in daily_counts),
+            "chart_width": len(chart_bars) * (CHART_BAR_WIDTH + CHART_BAR_GAP) - CHART_BAR_GAP,
+            "chart_height": CHART_BASELINE_Y,
+            "svg_height": CHART_BASELINE_Y + CHART_MARKER_SPACE,
+        },
     )
 
 
