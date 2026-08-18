@@ -6,3 +6,9 @@ venv/
 *.egg-info/
 dist/
 build/
+
+# Claude Code / agent tooling (local only, not part of the project)
+.claude/
+.agents/
+.impeccable/
+skills-lock.json
