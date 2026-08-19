@@ -1,14 +1,14 @@
 import secrets
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -117,10 +117,52 @@ def get_error_groups(db: Session, project: Project) -> List[ErrorGroup]:
     )
 
 
+DEFAULT_PAGE_SIZE = 20
+
+
+def query_error_groups(
+    db: Session,
+    project: Project,
+    q: Optional[str] = None,
+    status: Optional[str] = None,
+    page: int = 1,
+    page_size: int = DEFAULT_PAGE_SIZE,
+) -> tuple[List[ErrorGroup], int]:
+    query = db.query(ErrorGroup).filter(ErrorGroup.project_id == project.id)
+
+    if status:
+        query = query.filter(ErrorGroup.status == status)
+
+    if q:
+        like = f"%{q}%"
+        query = query.filter(
+            or_(ErrorGroup.exception_type.ilike(like), ErrorGroup.file_path.ilike(like))
+        )
+
+    total = query.count()
+
+    error_groups = (
+        query.order_by(ErrorGroup.last_seen.desc())
+        .offset((max(page, 1) - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+
+    return error_groups, total
+
+
 @app.get("/api/errors", response_model=List[ErrorGroupOut])
-def list_errors(api_key: str, db: Session = Depends(get_db)):
+def list_errors(
+    api_key: str,
+    q: Optional[str] = None,
+    status: Optional[str] = None,
+    page: int = 1,
+    page_size: int = DEFAULT_PAGE_SIZE,
+    db: Session = Depends(get_db),
+):
     project = get_project_by_api_key(db, api_key)
-    return get_error_groups(db, project)
+    error_groups, _ = query_error_groups(db, project, q=q, status=status, page=page, page_size=page_size)
+    return error_groups
 
 
 def get_error_group_or_404(db: Session, project: Project, error_group_id: int) -> ErrorGroup:
@@ -198,12 +240,16 @@ def create_project(name: str = Form(...), db: Session = Depends(get_db)):
 def dashboard_errors_list(
     request: Request,
     api_key: str,
+    q: Optional[str] = None,
+    status: Optional[str] = None,
+    page: int = 1,
     new: bool = False,
     error: str = None,
     db: Session = Depends(get_db),
 ):
     project = get_project_by_api_key(db, api_key)
-    error_groups = get_error_groups(db, project)
+    error_groups, total = query_error_groups(db, project, q=q, status=status, page=page)
+    total_pages = max((total + DEFAULT_PAGE_SIZE - 1) // DEFAULT_PAGE_SIZE, 1)
 
     return templates.TemplateResponse(
         request=request,
@@ -215,6 +261,11 @@ def dashboard_errors_list(
             "new_project": new,
             "error": error,
             "server_url": str(request.base_url).rstrip("/"),
+            "q": q or "",
+            "status_filter": status or "",
+            "page": page,
+            "total_pages": total_pages,
+            "total": total,
         },
     )
 
