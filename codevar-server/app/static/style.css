@@ -168,6 +168,59 @@ code {
     font-variant-numeric: tabular-nums;
 }
 
+/* filters + pagination */
+
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    margin-top: 0.75rem;
+}
+
+.filter-search {
+    flex: 1 1 220px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 0.45rem 0.6rem;
+    font-size: 0.9rem;
+}
+
+.filter-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 0.45rem 0.6rem;
+    font-size: 0.9rem;
+}
+
+.btn-link {
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.btn-link:hover {
+    color: var(--text);
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.pagination .disabled {
+    pointer-events: none;
+    opacity: 0.4;
+}
+
 /* error table */
 
 .table-wrap {
