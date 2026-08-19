@@ -60,6 +60,26 @@ app.add_middleware(
 </details>
 
 <h3>Errores</h3>
+<form method="get" action="/dashboard" class="filter-bar">
+    <input type="hidden" name="api_key" value="{{ api_key }}">
+    <input
+        type="text"
+        name="q"
+        value="{{ q }}"
+        placeholder="Buscar por tipo o archivo..."
+        class="filter-search"
+    >
+    <select name="status" class="filter-select">
+        <option value="" {% if not status_filter %}selected{% endif %}>Todos los estados</option>
+        <option value="unresolved" {% if status_filter == "unresolved" %}selected{% endif %}>Sin resolver</option>
+        <option value="resolved" {% if status_filter == "resolved" %}selected{% endif %}>Resuelto</option>
+        <option value="ignored" {% if status_filter == "ignored" %}selected{% endif %}>Ignorado</option>
+    </select>
+    <button type="submit" class="btn-secondary">Filtrar</button>
+    {% if q or status_filter %}
+    <a href="/dashboard?api_key={{ api_key }}" class="btn-link">Limpiar</a>
+    {% endif %}
+</form>
 {% if error_groups %}
 <div class="table-wrap">
     <table class="error-table">
@@ -85,12 +105,25 @@ app.add_middleware(
         </tbody>
     </table>
 </div>
+{% if total_pages > 1 %}
+<nav class="pagination">
+    <a
+        href="/dashboard?api_key={{ api_key }}&q={{ q }}&status={{ status_filter }}&page={{ page - 1 }}"
+        class="btn-secondary {% if page <= 1 %}disabled{% endif %}"
+    >&larr; Anterior</a>
+    <span class="muted">Página {{ page }} de {{ total_pages }}</span>
+    <a
+        href="/dashboard?api_key={{ api_key }}&q={{ q }}&status={{ status_filter }}&page={{ page + 1 }}"
+        class="btn-secondary {% if page >= total_pages %}disabled{% endif %}"
+    >Siguiente &rarr;</a>
+</nav>
+{% endif %}
 {% else %}
 <div class="empty-state">
     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    <p>No hay errores registrados todavía.</p>
+    <p>{% if q or status_filter %}No hay errores que coincidan con el filtro.{% else %}No hay errores registrados todavía.{% endif %}</p>
 </div>
 {% endif %}
 
