@@ -18,6 +18,7 @@ class EventReporter:
         info: ExceptionInfo,
         request_path: Optional[str] = None,
         request_method: Optional[str] = None,
+        extra_context: Optional[dict] = None,
     ) -> None:
         payload = {
             "project_api_key": self.config.api_key,
@@ -27,6 +28,7 @@ class EventReporter:
             "stack_trace": info.stack_trace,
             "request_path": request_path,
             "request_method": request_method,
+            "extra_context": extra_context,
         }
         try:
             requests.post(

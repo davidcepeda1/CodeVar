@@ -120,6 +120,14 @@
             <span class="copy-label">Copiar</span>
         </button>
         <pre class="stack-trace">{{ event.stack_trace }}</pre>
+        {% if event.extra_context %}
+        <dl class="extra-context">
+            {% for key, value in event.extra_context.items() %}
+            <dt>{{ key }}</dt>
+            <dd>{{ value }}</dd>
+            {% endfor %}
+        </dl>
+        {% endif %}
     </details>
     {% endfor %}
 </div>

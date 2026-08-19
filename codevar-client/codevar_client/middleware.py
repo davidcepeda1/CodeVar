@@ -35,4 +35,18 @@ class CodevarMiddleware(BaseHTTPMiddleware):
             info,
             request_path=request.url.path,
             request_method=request.method,
+            extra_context=self._build_extra_context(request),
         )
+
+    @staticmethod
+    def _build_extra_context(request: Request) -> dict:
+        context = {}
+
+        user_agent = request.headers.get("user-agent")
+        if user_agent:
+            context["user_agent"] = user_agent
+
+        if request.query_params:
+            context["query_params"] = dict(request.query_params)
+
+        return context
