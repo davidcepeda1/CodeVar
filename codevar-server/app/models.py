@@ -19,6 +19,7 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True, nullable=False)
     api_key = Column(String(64), unique=True, nullable=False)
+    webhook_url = Column(String(500), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
 
     error_groups = relationship("ErrorGroup", cascade="all, delete-orphan")

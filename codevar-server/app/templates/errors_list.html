@@ -59,6 +59,35 @@ app.add_middleware(
     </button>
 </details>
 
+<details class="connection-panel" {% if error == "invalid_webhook_url" %}open{% endif %}>
+    <summary>
+        <span class="chevron" aria-hidden="true"></span>
+        <svg class="plug-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Alertas por webhook
+        <span class="hint">{% if project.webhook_url %}configurado{% else %}sin configurar{% endif %}</span>
+    </summary>
+    <p class="muted">
+        URL de webhook (Discord o Slack) a la que se envía un aviso cuando aparece un
+        <strong>error nuevo</strong> en este proyecto. Déjalo vacío para desactivarlo.
+    </p>
+    {% if error == "invalid_webhook_url" %}
+    <p class="form-error">La URL debe empezar con http:// o https://.</p>
+    {% endif %}
+    <form method="post" action="/dashboard/projects/webhook?api_key={{ api_key }}" class="webhook-form">
+        <input
+            type="text"
+            name="webhook_url"
+            value="{{ project.webhook_url or '' }}"
+            placeholder="https://discord.com/api/webhooks/..."
+            maxlength="500"
+            class="filter-search"
+        >
+        <button type="submit" class="btn-secondary">Guardar</button>
+    </form>
+</details>
+
 <h3>Errores</h3>
 <form method="get" action="/dashboard" class="filter-bar">
     <input type="hidden" name="api_key" value="{{ api_key }}">

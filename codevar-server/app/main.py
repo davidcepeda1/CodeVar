@@ -1,8 +1,10 @@
+import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Optional
 
+import requests
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
@@ -17,6 +19,8 @@ from app.fingerprint import compute_fingerprint
 from app.models import Base, ErrorEvent, ErrorGroup, Project
 from app.rate_limit import events_rate_limiter
 from app.schemas import ErrorGroupDetailOut, ErrorGroupOut, ErrorStatusUpdate, EventIn
+
+logger = logging.getLogger("codevar")
 
 APP_DIR = Path(__file__).resolve().parent
 
@@ -37,7 +41,7 @@ def get_project_by_api_key(db: Session, api_key: str) -> Project:
     return project
 
 
-def get_or_create_error_group(db: Session, project: Project, event: EventIn) -> ErrorGroup:
+def get_or_create_error_group(db: Session, project: Project, event: EventIn) -> tuple[ErrorGroup, bool]:
     fingerprint = compute_fingerprint(event.exception_type, event.file_path, event.line_number)
 
     error_group = (
@@ -52,7 +56,7 @@ def get_or_create_error_group(db: Session, project: Project, event: EventIn) -> 
     if error_group is not None:
         error_group.event_count += 1
         error_group.last_seen = func.now()
-        return error_group
+        return error_group, False
 
     error_group = ErrorGroup(
         project_id=project.id,
@@ -65,7 +69,8 @@ def get_or_create_error_group(db: Session, project: Project, event: EventIn) -> 
     try:
         db.flush()
     except IntegrityError:
-        # otro evento con el mismo fingerprint se insertó primero (condición de carrera)
+        # otro evento con el mismo fingerprint se insertó primero (condición de carrera):
+        # para esta request el grupo ya existía, así que no cuenta como nuevo.
         db.rollback()
         error_group = (
             db.query(ErrorGroup)
@@ -77,12 +82,31 @@ def get_or_create_error_group(db: Session, project: Project, event: EventIn) -> 
         )
         error_group.event_count += 1
         error_group.last_seen = func.now()
+        return error_group, False
 
-    return error_group
+    return error_group, True
+
+
+def notify_new_error_group(project: Project, error_group: ErrorGroup, server_url: str) -> None:
+    if not project.webhook_url:
+        return
+
+    dashboard_url = f"{server_url}/dashboard/errors/{error_group.id}?api_key={project.api_key}"
+    payload = {
+        "content": (
+            f"🚨 Nuevo error en **{project.name}**: `{error_group.exception_type}` "
+            f"en `{error_group.file_path}:{error_group.line_number}`\n{dashboard_url}"
+        ),
+    }
+    try:
+        requests.post(project.webhook_url, json=payload, timeout=3)
+    except requests.RequestException:
+        # CodeVAR nunca debe romperse porque el webhook del usuario esté caído.
+        logger.warning("codevar: failed to notify webhook for project %s", project.id, exc_info=True)
 
 
 @app.post("/api/events", status_code=201)
-def create_event(event: EventIn, db: Session = Depends(get_db)):
+def create_event(event: EventIn, request: Request, db: Session = Depends(get_db)):
     project = get_project_by_api_key(db, event.project_api_key)
 
     retry_after = events_rate_limiter.check(project.api_key)
@@ -93,7 +117,7 @@ def create_event(event: EventIn, db: Session = Depends(get_db)):
             headers={"Retry-After": str(retry_after)},
         )
 
-    error_group = get_or_create_error_group(db, project, event)
+    error_group, is_new = get_or_create_error_group(db, project, event)
 
     error_event = ErrorEvent(
         error_group_id=error_group.id,
@@ -104,6 +128,9 @@ def create_event(event: EventIn, db: Session = Depends(get_db)):
     )
     db.add(error_event)
     db.commit()
+
+    if is_new:
+        notify_new_error_group(project, error_group, str(request.base_url).rstrip("/"))
 
     return {"error_group_id": error_group.id}
 
@@ -268,6 +295,24 @@ def dashboard_errors_list(
             "total": total,
         },
     )
+
+
+@app.post("/dashboard/projects/webhook")
+def dashboard_update_webhook(
+    api_key: str, webhook_url: str = Form(""), db: Session = Depends(get_db)
+):
+    project = get_project_by_api_key(db, api_key)
+    webhook_url = webhook_url.strip()
+
+    if webhook_url and not webhook_url.startswith(("http://", "https://")):
+        return RedirectResponse(
+            url=f"/dashboard?api_key={api_key}&error=invalid_webhook_url", status_code=303
+        )
+
+    project.webhook_url = webhook_url or None
+    db.commit()
+
+    return RedirectResponse(url=f"/dashboard?api_key={api_key}", status_code=303)
 
 
 @app.post("/dashboard/projects/rename")
