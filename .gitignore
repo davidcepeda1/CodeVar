@@ -12,4 +12,5 @@ build/
 .agents/
 .claude/
 .impeccable/
+.codegraph/
 skills-lock.json
