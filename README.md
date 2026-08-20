@@ -46,9 +46,9 @@ codevar-server   →  API de ingesta + agrupación por fingerprint
 
 ## Demo
 
-Flujo real (no simulado): se crea un proyecto, se conecta una app FastAPI real (`backend-canchas`), ocurre un bug genuino en producción, y aparece en el dashboard.
+Recorrido por el dashboard: overview de proyectos, panel de conexión con pestañas por lenguaje (Python/Node), alertas por webhook, búsqueda/filtro de errores, y el detalle de un error con su gráfico de frecuencia y `extra_context`.
 
-![Demo de CodeVAR: crear proyecto, conectar una app, un error real ocurre y aparece en el dashboard](demo.gif)
+![Demo de CodeVAR: overview de proyectos, conexión multi-lenguaje, filtros, alertas por webhook y detalle de error con gráfico de frecuencia](demo.gif)
 
 ## Prueba tu propia app
 
