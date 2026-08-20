@@ -888,6 +888,63 @@ code {
     margin-bottom: 0.15rem;
 }
 
+/* selector de lenguaje del snippet de conexión */
+
+.lang-tabs {
+    margin-top: 0.5rem;
+}
+
+.lang-tabs input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.lang-tabs label {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 500;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    background: var(--bg);
+}
+
+.lang-tabs label:first-of-type {
+    margin-right: 0.3rem;
+}
+
+.lang-tabs input:checked + label {
+    color: var(--text);
+    background: var(--surface);
+    border-color: var(--border-strong);
+}
+
+.lang-tabs input:focus-visible + label {
+    outline: 2px solid var(--accent-strong);
+    outline-offset: 2px;
+}
+
+.lang-panel {
+    display: none;
+    border: 1px solid var(--border-strong);
+    border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+    background: var(--surface);
+    padding: 0.75rem 0.9rem;
+}
+
+.lang-tabs input[id^="lang-python-"]:checked ~ .lang-panel-python {
+    display: block;
+}
+
+.lang-tabs input[id^="lang-node-"]:checked ~ .lang-panel-node {
+    display: block;
+}
+
 /* danger zone */
 
 .danger-zone {
