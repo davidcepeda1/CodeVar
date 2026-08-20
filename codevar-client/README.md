@@ -28,7 +28,7 @@ EventReporter.send()          →  POST {server_url}/api/events
 | Módulo | Responsabilidad |
 |---|---|
 | `config.py` | `CodevarConfig`: `server_url`, `api_key` del proyecto, `timeout` (default 2s) |
-| `middleware.py` | `CodevarMiddleware`: intercepta cada request, captura excepciones no manejadas |
+| `middleware.py` | `CodevarMiddleware`: intercepta cada request, captura excepciones no manejadas y arma `extra_context` (user-agent, query params) |
 | `traceback_utils.py` | `extract_exception_info`: parsea el traceback y arma el `ExceptionInfo` a reportar |
 | `reporter.py` | `EventReporter`: hace el `POST /api/events`, absorbe cualquier error de red |
 
@@ -66,8 +66,9 @@ Con eso agregado, cualquier excepción no manejada que ocurra dentro de un endpo
 
 1. Se captura automáticamente (no hace falta envolver nada en `try/except`)
 2. Se extrae tipo de excepción, archivo y línea del frame donde ocurrió el `raise`
-3. Se envía como evento a `codevar-server`, que lo agrupa por fingerprint
-4. La excepción original se sigue propagando normalmente — FastAPI responde su `500` como siempre, el middleware no cambia ese comportamiento
+3. Se captura también `extra_context` (JSON): el `user-agent` y los query params de la request que originó el error
+4. Se envía como evento a `codevar-server`, que lo agrupa por fingerprint
+5. La excepción original se sigue propagando normalmente — FastAPI responde su `500` como siempre, el middleware no cambia ese comportamiento
 
 **Nota importante:** el reporter nunca lanza excepciones propias. Si `codevar-server` está caído o no responde, el intento de reportar falla en silencio (se loguea un warning) — CodeVAR nunca debe ser la razón por la que tu app se cae de forma distinta a como ya se caía.
 
