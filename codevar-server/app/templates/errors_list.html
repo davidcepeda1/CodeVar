@@ -33,7 +33,6 @@
             <span class="copy-label">Copiar</span>
         </button>
     </div>
-    <p class="muted">Agrega esto en tu app FastAPI (<code>main.py</code>, justo después de crear <code>app</code>):</p>
     <div class="callout">
         <svg class="callout-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
@@ -44,7 +43,16 @@
             Es la dirección de este CodeVAR — no la de tu propia app.
         </p>
     </div>
-    <pre id="project-snippet" class="stack-trace">from codevar_client.config import CodevarConfig
+
+    <div class="lang-tabs">
+        <input type="radio" name="sdk-lang-{{ project.id }}" id="lang-python-{{ project.id }}" checked>
+        <label for="lang-python-{{ project.id }}">Python / FastAPI</label>
+        <input type="radio" name="sdk-lang-{{ project.id }}" id="lang-node-{{ project.id }}">
+        <label for="lang-node-{{ project.id }}">Node / Express</label>
+
+        <div class="lang-panel lang-panel-python">
+            <p class="muted">Agrega esto en tu app FastAPI (<code>main.py</code>, justo después de crear <code>app</code>):</p>
+            <pre id="project-snippet-python" class="stack-trace">from codevar_client.config import CodevarConfig
 from codevar_client.middleware import CodevarMiddleware
 
 app.add_middleware(
@@ -54,9 +62,25 @@ app.add_middleware(
         api_key="{{ api_key }}",
     ),
 )</pre>
-    <button type="button" class="copy-btn" onclick="codevarCopyById(this, 'project-snippet')">
-        <span class="copy-label">Copiar snippet</span>
-    </button>
+            <button type="button" class="copy-btn" onclick="codevarCopyById(this, 'project-snippet-python')">
+                <span class="copy-label">Copiar snippet</span>
+            </button>
+        </div>
+        <div class="lang-panel lang-panel-node">
+            <p class="muted">Agrega esto en tu app Express (después de definir tus rutas):</p>
+            <pre id="project-snippet-node" class="stack-trace">const { createConfig, codevarErrorHandler } = require("codevar-client");
+
+const config = createConfig({
+    serverUrl: "{{ server_url }}",  // CodeVAR — no el puerto de tu app
+    apiKey: "{{ api_key }}",
+});
+
+app.use(codevarErrorHandler(config));</pre>
+            <button type="button" class="copy-btn" onclick="codevarCopyById(this, 'project-snippet-node')">
+                <span class="copy-label">Copiar snippet</span>
+            </button>
+        </div>
+    </div>
 </details>
 
 <details class="connection-panel" {% if error == "invalid_webhook_url" %}open{% endif %}>
