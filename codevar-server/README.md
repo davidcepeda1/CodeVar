@@ -96,6 +96,10 @@ Todos los endpoints (API y dashboard) devuelven `401` si la `api_key` no corresp
 
 Cada proyecto puede configurar una `webhook_url` (compatible con Discord/Slack) desde el panel del dashboard. Cuando `POST /api/events` crea un **error group nuevo** (no en reocurrencias del mismo error), `codevar-server` dispara un `POST` best-effort a esa URL con un mensaje corto (tipo de excepción, ubicación, link al detalle). Si el webhook falla o está caído, el intento se loguea y se descarta — nunca afecta la ingesta del evento.
 
+Validado contra un webhook de Discord real:
+
+<img src="../docs/img/discordWebhook.png" alt="Alerta de CodeVAR recibida en un canal de Discord" width="360">
+
 ## Stack
 
 - FastAPI
