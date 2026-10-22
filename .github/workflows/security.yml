@@ -1,0 +1,28 @@
+name: seguridad
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pipeline-seguridad:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: codevar-server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Instalar dependencias
+        run: pip install -r requirements-security.txt
+      - name: Ejecutar SAST, SCA, pruebas y DAST
+        run: bash security/run_security_checks.sh ci
+      - name: Conservar evidencia
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-seguridad-${{ github.sha }}
+          path: codevar-server/evidencias/
+          retention-days: 90

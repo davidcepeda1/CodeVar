@@ -1,1 +1,6 @@
 *.db
+
+# evidencias locales del pipeline de seguridad
+evidencias/
+.schemathesis/
+.hypothesis/

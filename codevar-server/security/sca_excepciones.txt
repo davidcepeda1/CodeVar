@@ -1,0 +1,4 @@
+# Vulnerabilidades de dependencias aceptadas temporalmente.
+# Formato: ID_DE_VULNERABILIDAD  EXC-xx  fecha_de_expiración
+# Cada línea debe tener su ficha en security/excepciones.md.
+# Actualmente no hay excepciones de dependencias.
