@@ -18,6 +18,7 @@ from app.database import engine, get_db
 from app.fingerprint import compute_fingerprint
 from app.models import Base, ErrorEvent, ErrorGroup, Project
 from app.rate_limit import events_rate_limiter
+from app.webhook_guard import webhook_destino_permitido
 from app.schemas import ErrorGroupDetailOut, ErrorGroupOut, ErrorStatusUpdate, EventIn
 
 logger = logging.getLogger("codevar")
@@ -89,6 +90,11 @@ def get_or_create_error_group(db: Session, project: Project, event: EventIn) -> 
 
 def notify_new_error_group(project: Project, error_group: ErrorGroup, server_url: str) -> None:
     if not project.webhook_url:
+        return
+
+    # Se valida otra vez al enviar: el DNS pudo cambiar desde que se guardó.
+    if not webhook_destino_permitido(project.webhook_url):
+        logger.warning("codevar: webhook destination rejected for project %s", project.id)
         return
 
     dashboard_url = f"{server_url}/dashboard/errors/{error_group.id}?api_key={project.api_key}"
@@ -304,7 +310,7 @@ def dashboard_update_webhook(
     project = get_project_by_api_key(db, api_key)
     webhook_url = webhook_url.strip()
 
-    if webhook_url and not webhook_url.startswith(("http://", "https://")):
+    if webhook_url and not webhook_destino_permitido(webhook_url):
         return RedirectResponse(
             url=f"/dashboard?api_key={api_key}&error=invalid_webhook_url", status_code=303
         )
