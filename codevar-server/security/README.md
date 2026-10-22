@@ -40,13 +40,13 @@ artefacto durante 90 días.
 ## Repetir la comparación antes y después
 
 ```bash
-git checkout cb154e2   # pruebas y pipeline sobre el código original
+git checkout 30bde88   # pruebas y pipeline sobre el código original
 bash security/run_security_checks.sh antes
-git checkout d5e9514   # mismas pruebas, código corregido
+git checkout 8c4109b   # mismas pruebas, código corregido
 bash security/run_security_checks.sh despues
 ```
 
-`git diff cb154e2 d5e9514 -- tests tests_dast security` sale vacío: las pruebas
+`git diff 30bde88 8c4109b -- tests tests_dast security` sale vacío: las pruebas
 son idénticas en ambas ejecuciones.
 
 ## Excepciones
