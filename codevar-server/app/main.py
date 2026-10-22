@@ -2,10 +2,11 @@ import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import List, Optional
+from typing import Annotated, List, Optional
 
 import requests
-from fastapi import Depends, FastAPI, Form, HTTPException, Request
+from fastapi import Depends, FastAPI, Form, HTTPException, Query, Request
+from fastapi import Path as PathParam
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -19,7 +20,7 @@ from app.fingerprint import compute_fingerprint
 from app.models import Base, ErrorEvent, ErrorGroup, Project
 from app.rate_limit import events_rate_limiter
 from app.webhook_guard import webhook_destino_permitido
-from app.schemas import ErrorGroupDetailOut, ErrorGroupOut, ErrorStatusUpdate, EventIn
+from app.schemas import MAX_ENTERO_BD, ErrorGroupDetailOut, ErrorGroupOut, ErrorStatusUpdate, EventIn
 
 logger = logging.getLogger("codevar")
 
@@ -151,6 +152,11 @@ def get_error_groups(db: Session, project: Project) -> List[ErrorGroup]:
 
 
 DEFAULT_PAGE_SIZE = 20
+MAX_PAGE_SIZE = 100
+MAX_PAGE = 100_000
+
+# Identificador de grupo acotado al rango de la columna INTEGER.
+IdGrupo = Annotated[int, PathParam(ge=1, le=MAX_ENTERO_BD)]
 
 
 def query_error_groups(
@@ -189,8 +195,8 @@ def list_errors(
     api_key: str,
     q: Optional[str] = None,
     status: Optional[str] = None,
-    page: int = 1,
-    page_size: int = DEFAULT_PAGE_SIZE,
+    page: int = Query(1, ge=1, le=MAX_PAGE),
+    page_size: int = Query(DEFAULT_PAGE_SIZE, ge=1, le=MAX_PAGE_SIZE),
     db: Session = Depends(get_db),
 ):
     project = get_project_by_api_key(db, api_key)
@@ -210,7 +216,7 @@ def get_error_group_or_404(db: Session, project: Project, error_group_id: int) -
 
 
 @app.get("/api/errors/{error_group_id}", response_model=ErrorGroupDetailOut)
-def get_error_detail(error_group_id: int, api_key: str, db: Session = Depends(get_db)):
+def get_error_detail(error_group_id: IdGrupo, api_key: str, db: Session = Depends(get_db)):
     project = get_project_by_api_key(db, api_key)
     return get_error_group_or_404(db, project, error_group_id)
 
@@ -224,7 +230,7 @@ def set_error_status(db: Session, error_group: ErrorGroup, status: str) -> Error
 
 @app.patch("/api/errors/{error_group_id}", response_model=ErrorGroupOut)
 def update_error_status(
-    error_group_id: int,
+    error_group_id: IdGrupo,
     update: ErrorStatusUpdate,
     api_key: str,
     db: Session = Depends(get_db),
@@ -275,7 +281,7 @@ def dashboard_errors_list(
     api_key: str,
     q: Optional[str] = None,
     status: Optional[str] = None,
-    page: int = 1,
+    page: int = Query(1, ge=1, le=MAX_PAGE),
     new: bool = False,
     error: str = None,
     db: Session = Depends(get_db),
@@ -411,7 +417,7 @@ def get_daily_event_counts(db: Session, error_group: ErrorGroup, days: int = 14)
 
 @app.get("/dashboard/errors/{error_group_id}")
 def dashboard_error_detail(
-    error_group_id: int, request: Request, api_key: str, db: Session = Depends(get_db)
+    error_group_id: IdGrupo, request: Request, api_key: str, db: Session = Depends(get_db)
 ):
     project = get_project_by_api_key(db, api_key)
     error_group = get_error_group_or_404(db, project, error_group_id)
@@ -435,7 +441,7 @@ def dashboard_error_detail(
 
 @app.post("/dashboard/errors/{error_group_id}/status")
 def dashboard_update_error_status(
-    error_group_id: int,
+    error_group_id: IdGrupo,
     api_key: str,
     status: str = Form(...),
     db: Session = Depends(get_db),
